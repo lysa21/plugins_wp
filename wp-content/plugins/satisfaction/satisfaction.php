@@ -25,7 +25,6 @@ class Satisfaction
         include_once('QuestionWidget.php');
 
         register_activation_hook(__FILE__, array('Satisfaction', 'install'));
-        register_activation_hook(__FILE__, array('Satisfaction', 'install'));
         register_deactivation_hook(__FILE__, array('Satisfaction', 'desactivate'));
         register_uninstall_hook(__FILE__, array('Satisfaction', 'uninstall'));
 
