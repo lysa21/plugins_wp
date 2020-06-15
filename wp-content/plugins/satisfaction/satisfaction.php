@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package sa
  * @version 1.7.2
@@ -15,50 +16,68 @@ Author URI: http://ma.tt/
 //  } 
 //  add_action( 'init', 'bonjour');
 
-require_once('QuestionWidget.php');
 
- class Satisfaction
- {
-   public function __construct()
-   {
-    add_action('widgets_init',array($this,'declarerWidget'));
-    add_action('admin_menu',array($this,'declareAdmin'));
-   }
+class Satisfaction
+{
+    public function __construct()
+    {
 
-   public static function install(){
-    Satisfaction::install_db();
-   }
-   public static function uninstall(){
-    Satisfaction::uninstall_db();
-   }
+        include_once('QuestionWidget.php');
 
-   public static function desactivate(){}
-   public function install_db(){
-    global $wpdb;
-    $wpdb->query("CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."reponse_question (id int(11) AUTO_INCREMENT PRIMARY KEY, reponse tinyint(1), idUser int(11));");
-  }
+        register_activation_hook(__FILE__, array('Satisfaction', 'install'));
+        register_activation_hook(__FILE__, array('Satisfaction', 'install'));
+        register_deactivation_hook(__FILE__, array('Satisfaction', 'desactivate'));
+        register_uninstall_hook(__FILE__, array('Satisfaction', 'uninstall'));
 
-  public function uninstall_db(){
-        global $wpdb;
-        $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."reponse_question;"); 
-  }
-
-   function declarerWidget() {
-        register_widget('QuestionWidget');
-   }
-
-   public function declareAdmin(){
-        add_menu_page('Configuration du questionnaire', 'Questionnaire', 'manage_options', 'question', array($this, 'menuHtml'));
-        add_submenu_page('question','Réinitialisation du questionnaire','Réinitialisation','manage_options','reinit',array($this,'menuHtmlInit'));
+        add_action('widgets_init', array($this, 'declarerWidget'));
+        add_action('admin_menu', array($this, 'declareAdmin'));
     }
 
-    public  function menuHtml(){
-        echo '<h1>'.get_admin_page_title().'</h1>';
+    public static function install()
+    {
+        Satisfaction::install_db();
+    }
+    public static function uninstall()
+    {
+        Satisfaction::uninstall_db();
+    }
+
+    public static function desactivate()
+    {
+    }
+
+    public static function install_db()
+    {
+        global $wpdb;
+        $wpdb->query("CREATE TABLE IF NOT EXISTS " . $wpdb->prefix . "reponse_question (id int(11) AUTO_INCREMENT PRIMARY KEY, reponse tinyint(1), idUser int(11));");
+    }
+
+    public static function uninstall_db()
+    {
+        global $wpdb;
+        $wpdb->query("DROP TABLE IF EXISTS " . $wpdb->prefix . "reponse_question;");
+    }
+
+    function declarerWidget()
+    {
+        register_widget('QuestionWidget');
+    }
+
+    public function declareAdmin()
+    {
+        add_menu_page('Configuration du questionnaire', 'Questionnaire', 'manage_options', 'question', array($this, 'menuHtml'));
+        add_submenu_page('question', 'Réinitialisation du questionnaire', 'Réinitialisation', 'manage_options', 'reinit', array($this, 'menuHtmlInit'));
+    }
+
+    public function menuHtml()
+    {
+        echo '<h1>' . get_admin_page_title() . '</h1>';
         echo '<p>Page du plugin Questionnaire !!! </p>';
         echo $this->resume();
     }
 
-    public static function menuHtmlInit(){
+    public function menuHtmlInit()
+    {
         global $wpdb;
         echo '<h1>Réinitialisation</h1>';
         echo '<p>Cliquer sur le bouton suivant pour réinitialiser le questionnaire</p>';
@@ -66,32 +85,28 @@ require_once('QuestionWidget.php');
         <input type='submit' name='reinit'>
         </form>
         ";
-        if(isset($_POST['reinit'])){
-            $query = 'TRUNCATE TABLE '.$wpdb->prefix.'reponse_question';
+        if (isset($_POST['reinit'])) {
+            $query = 'TRUNCATE TABLE ' . $wpdb->prefix . 'reponse_question';
             $wpdb->query($query);
-            echo "réinitialisation !!!"; 
+            echo "réinitialisation !!!";
         }
     }
 
-    public function resume(){
+    public function resume()
+    {
         global $wpdb;
-        $query = "SELECT * FROM ".$wpdb->prefix."reponse_question";
-        $resultats = $wpdb->get_results($query) ;
+        $query = "SELECT * FROM " . $wpdb->prefix . "reponse_question";
+        $resultats = $wpdb->get_results($query);
         $oui = 0;
         $non = 0;
-        foreach($resultats as $rep){
-          if($rep->reponse==1)
-            $oui++;
-          else
-            $non++;
-          }
+        foreach ($resultats as $rep) {
+            if ($rep->reponse == 1)
+                $oui++;
+            else
+                $non++;
+        }
         return "Oui : $oui, Non : $non";
     }
 }
-  
- new Satisfaction();
 
-register_activation_hook(__FILE__,array('Satisfaction','install'));
-register_activation_hook(__FILE__,array('Satisfaction','install')); 
-register_deactivation_hook(__FILE__,array('Satisfaction','desactivate'));
-register_uninstall_hook(__FILE__,array('Satisfaction','uninstall'));
+new Satisfaction();
